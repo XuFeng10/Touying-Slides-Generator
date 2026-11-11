@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "oxc.oxc-vscode",
+    "myriad-dreamin.tinymist",
+    "vitest.explorer",
+    "firefox-devtools.vscode-firefox-debug"
+  ]
+}

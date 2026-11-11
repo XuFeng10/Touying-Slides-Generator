@@ -1,0 +1,14 @@
+{
+  "printWidth": 80,
+  "sortImports": true,
+  "sortPackageJson": true,
+  "ignorePatterns": [
+    "node_modules/",
+    "dist*/",
+    "release*/",
+    "coverage/",
+    "build/",
+    ".react-router/",
+    "LICENSE"
+  ]
+}

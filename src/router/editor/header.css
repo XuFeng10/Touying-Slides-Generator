@@ -1,0 +1,22 @@
+header {
+  display: grid;
+  grid-template-columns:
+    minmax(max-content, 1fr) minmax(max-content, 2fr)
+    minmax(max-content, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px 0;
+  > .title {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    > .file-name {
+      font-weight: bold;
+      color: var(--ant-color-text-secondary);
+    }
+    > .modified-indicator {
+      color: var(--ant-color-text-secondary);
+    }
+  }
+}

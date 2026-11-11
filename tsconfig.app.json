@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "/*": ["./*"]
+    },
+    "rootDirs": [".", "./.react-router/types"],
+    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.app.tsbuildinfo",
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "types": ["vite/client", "@types/wicg-file-system-access"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "include": [
+    "src",
+    "src/**/.client/**/*",
+    "templates",
+    "examples",
+    "import.d.ts",
+    "node_modules/@mr.python/vite-plugin-remark-rehype/types.d.ts",
+    "tests/unit/**/*.common.test.ts",
+    "tests/unit/**/*.browser.test.ts",
+    ".react-router/types"
+  ]
+}

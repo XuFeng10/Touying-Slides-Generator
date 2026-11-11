@@ -1,0 +1,49 @@
+# 依赖
+node_modules/
+
+# 前端构建产物（react-router + Vite）
+/build/
+/.react-router/
+*.tsbuildinfo
+
+# Electron 打包产物
+/dist/
+/dist-*/
+/release/
+# 被残留文件句柄锁住、暂时删不掉的旧目录（重启后可手动删除）
+/*-stale/
+
+# 测试与覆盖率
+coverage/
+
+# 临时文件与日志
+temp/
+*.log
+logs/
+
+# 环境变量
+.env
+.env.*
+!.env.example
+
+# 编辑器与系统文件
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# 本地工具数据（不属于项目内容）
+.workbuddy/
+
+# 示例目录只保留手写源文件；main.typ / preview.webp 等由 scripts/compile-examples.ts 生成
+examples/*/**/*
+!examples/*/content.json
+!examples/*/extra-*.md
+!examples/*/problem-*.md
+!examples/*/**/*.ts
+!examples/*/**/*.tsx

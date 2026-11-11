@@ -1,0 +1,10 @@
+{
+  "tinymist.systemFonts": false,
+  "tinymist.fontPaths": ["assets/typst/fonts"],
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "[typst]": {
+    "editor.defaultFormatter": "myriad-dreamin.tinymist"
+  }
+}

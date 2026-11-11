@@ -1,0 +1,101 @@
+@font-face {
+  font-family: "Jellee-Roman";
+  src: url("assets/Jellee-Roman.woff2") format("woff2");
+}
+.app {
+  padding: 8px;
+}
+.root-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  gap: 16px;
+  margin: 8px;
+}
+.root-sidebar {
+  width: 248px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px 16px;
+  border: 1px solid var(--ant-color-border-secondary, #f0f0f0);
+  border-radius: 12px;
+  background: var(--ant-color-bg-layout, #f7f7f7);
+  overflow: auto;
+  > .root-sidebar-brand {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    > .favicon {
+      height: 40px;
+      width: 40px;
+      flex-shrink: 0;
+      border-radius: 10px;
+    }
+    > div {
+      min-width: 0;
+    }
+    .app-title {
+      margin: 0;
+      font-family: "Jellee-Roman";
+      font-size: 20px;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+    }
+    .root-sidebar-subtitle {
+      margin: 6px 0 0;
+      color: var(--ant-color-text-secondary, #666);
+      font-size: 12px;
+    }
+  }
+  > .root-sidebar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    > .ant-btn {
+      justify-content: flex-start;
+    }
+  }
+  > .root-sidebar-footer {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    > .ant-btn {
+      justify-content: flex-start;
+    }
+  }
+}
+.root-content {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 8px 32px;
+  overflow: auto;
+  > .root-content-title {
+    margin: 8px 8px 0;
+    font-size: 20px;
+    font-weight: 500;
+  }
+}
+@media (max-width: 700px) {
+  .root-layout {
+    flex-direction: column;
+  }
+  .root-sidebar {
+    width: auto;
+    gap: 12px;
+    padding: 12px;
+    > .root-sidebar-actions {
+      flex-direction: row;
+      flex-wrap: wrap;
+      > .ant-btn {
+        flex: 1;
+        min-width: 120px;
+      }
+    }
+    > .root-sidebar-footer {
+      margin-top: 0;
+    }
+  }
+}
