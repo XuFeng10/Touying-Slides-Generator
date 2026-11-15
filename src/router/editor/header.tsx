@@ -20,6 +20,7 @@ import { saveFileToDisk } from "@/utils/saveFile";
 import { uploadDocumentFromFile } from "@/utils/uploadDocument";
 
 import { useEditorDoc, useEditorEvents } from "./editorContext";
+import { useSaveDocument } from "./useSaveDocument";
 
 import "./header.css";
 
@@ -97,7 +98,14 @@ const ContestEditorHeader: FC = () => {
     });
   }, [modal, modified]);
 
-  const onClickSaveAs = useCallback(() => {
+  const saveCurrent = useSaveDocument();
+
+  const onClickSaveAs = useCallback(async () => {
+    // 桌面端直接弹原生「另存为」，不再出现「浏览器存储 / 本机文件」选择
+    if (window.electronAPI) {
+      await saveCurrent({ saveAs: true });
+      return;
+    }
     explorer
       .show({
         mode: "save",
@@ -122,11 +130,15 @@ const ContestEditorHeader: FC = () => {
           editorEvents.emit("documentSaved", { path: data.path });
         }
       });
-  }, [explorer, setPath, updateDoc, doc, editorEvents]);
+  }, [explorer, setPath, updateDoc, doc, editorEvents, saveCurrent]);
 
   const onClickSave = useCallback(async () => {
+    if (window.electronAPI) {
+      await saveCurrent();
+      return;
+    }
     if (!path) {
-      onClickSaveAs();
+      void onClickSaveAs();
       return;
     }
     try {
@@ -137,7 +149,15 @@ const ContestEditorHeader: FC = () => {
       console.error("Error when saving document.", e);
       message.error("保存失败");
     }
-  }, [doc, path, message, setModified, onClickSaveAs, editorEvents]);
+  }, [
+    doc,
+    path,
+    message,
+    setModified,
+    onClickSaveAs,
+    editorEvents,
+    saveCurrent,
+  ]);
 
   const onClickUpload = useCallback(async () => {
     await uploadDocumentFromFile({
@@ -194,8 +214,8 @@ const ContestEditorHeader: FC = () => {
             onSelect: onClickNew,
           },
           {
-            key: "upload",
-            label: "从本地上传",
+            key: "open",
+            label: "打开文档",
             onSelect: onClickUpload,
             shortcut: "Ctrl+O",
           },

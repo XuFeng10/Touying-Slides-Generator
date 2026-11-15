@@ -27,7 +27,8 @@ export default {
       </Tooltip>
     </>
   ),
-  enabled: true,
+  // 桌面端一律保存为本机文件，避免「浏览器存储」里的内容用户找不到
+  enabled: !window.electronAPI,
   saveDocument: async (
     path: string[],
     content: DocumentBase,

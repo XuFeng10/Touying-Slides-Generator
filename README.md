@@ -11,7 +11,7 @@
 - [x] 在线编辑与实时预览（SVG 多页渲染）
 - [x] 6 套 touying 主题：simple / metropolis / dewdrop / aqua / university / stargazer
 - [x] 自动保存工作副本，支持本机文件读写、导入导出 JSON
-- [x] 支持直接上传本地图片并设置图片大小
+- [x] 图片按 Typora 的方式引用：写本机绝对路径或网络地址，可拖拽 / 选择文件自动补全
 - [x] 导出幻灯片 PDF，或导出 Typst 源代码 ZIP
 - [x] 无需体积达 4GB 的 LaTeX 环境
 

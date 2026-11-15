@@ -11,6 +11,7 @@ import {
   dialog,
   ipcMain,
   Menu,
+  net,
   protocol,
   session,
   shell,
@@ -151,7 +152,17 @@ function configurePermissions() {
   );
 }
 
+/** 窗口关闭保护：渲染进程同步过来的脏状态，以及本次关闭是否已被用户确认 */
+const windowState = {
+  documentDirty: false,
+  approved: false,
+};
+
 function createWindow() {
+  // 关闭保护状态：文档被改过时先问渲染进程，避免无提示丢内容
+  windowState.documentDirty = false;
+  windowState.approved = false;
+
   const win = new BrowserWindow({
     width: 1440,
     height: 920,
@@ -172,6 +183,23 @@ function createWindow() {
   });
 
   win.once("ready-to-show", () => win.show());
+
+  win.on("close", (event) => {
+    if (windowState.approved || !windowState.documentDirty) return;
+    // 有未保存修改：拦下这次关闭，让渲染进程弹「保存 / 放弃 / 取消」
+    event.preventDefault();
+    win.webContents.send("app:before-close");
+  });
+
+  // 渲染进程崩溃时没法回答询问，直接放行，避免窗口永远关不掉
+  win.webContents.on("render-process-gone", () => {
+    windowState.documentDirty = false;
+  });
+
+  win.on("closed", () => {
+    windowState.documentDirty = false;
+    windowState.approved = false;
+  });
 
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (/^https?:\/\//u.test(url)) void shell.openExternal(url);
@@ -265,6 +293,20 @@ const DOCUMENT_FILTERS = [
   { name: "所有文件", extensions: ["*"] },
 ];
 
+const IMAGE_EXTENSIONS = [
+  "png",
+  "jpg",
+  "jpeg",
+  "gif",
+  "svg",
+  "webp",
+  "bmp",
+  "avif",
+];
+
+/** 单张图片的大小上限，避免误拖一个巨大文件把内存吃满。 */
+const MAX_IMAGE_BYTES = 64 * 1024 * 1024;
+
 function normalizeDialogPath(value) {
   return typeof value === "string" && path.isAbsolute(value) ? value : undefined;
 }
@@ -275,6 +317,21 @@ function registerIpcHandlers() {
     platform: process.platform,
     isPackaged: app.isPackaged,
   }));
+
+  // 渲染进程同步「是否有未保存修改」，用于决定关闭窗口时是否拦一下
+  ipcMain.on("app:setDocumentDirty", (event, dirty) => {
+    if (!BrowserWindow.fromWebContents(event.sender)) return;
+    windowState.documentDirty = Boolean(dirty);
+  });
+
+  // 用户在提醒对话框里选了「保存并退出」或「放弃更改并退出」
+  ipcMain.on("app:closeResponse", (event, action) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (!win || action !== "close") return;
+    windowState.approved = true;
+    // destroy 跳过 beforeunload，避免渲染进程的离开确认再拦一次
+    win.destroy();
+  });
 
   ipcMain.handle("document:open", async (event) => {
     const win = BrowserWindow.fromWebContents(event.sender);
@@ -334,6 +391,39 @@ function registerIpcHandlers() {
     if (result.canceled || !result.filePath) return { canceled: true };
     await writeFile(result.filePath, data);
     return { canceled: false, filePath: result.filePath };
+  });
+
+  // 选择要插入的图片，返回磁盘上的绝对路径（Markdown 里直接引用这些路径）
+  ipcMain.handle("dialog:openImages", async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    const result = await dialog.showOpenDialog(win, {
+      title: "插入图片",
+      properties: ["openFile", "multiSelections"],
+      filters: [{ name: "图片", extensions: IMAGE_EXTENSIONS }],
+    });
+    if (result.canceled) return { canceled: true, filePaths: [] };
+    return { canceled: false, filePaths: result.filePaths };
+  });
+
+  // 读取本机图片文件（Markdown 里写的是绝对路径）
+  ipcMain.handle("file:readBinary", async (_event, payload) => {
+    const filePath = normalizeDialogPath(payload?.filePath);
+    if (!filePath) throw new Error("无效的图片路径");
+    const info = await stat(filePath);
+    if (!info.isFile()) throw new Error("目标不是文件");
+    if (info.size > MAX_IMAGE_BYTES) throw new Error("图片文件过大");
+    return await readFile(filePath);
+  });
+
+  // 由主进程代取网络图片：渲染进程处于 app:// 源，直接请求会受跨域限制
+  ipcMain.handle("net:fetchBinary", async (_event, payload) => {
+    const url = typeof payload?.url === "string" ? payload.url : "";
+    if (!/^https?:\/\//i.test(url)) throw new Error("无效的图片地址");
+    const response = await net.fetch(url);
+    if (!response.ok) throw new Error(`下载失败：HTTP ${response.status}`);
+    const buffer = Buffer.from(await response.arrayBuffer());
+    if (buffer.byteLength > MAX_IMAGE_BYTES) throw new Error("图片文件过大");
+    return buffer;
   });
 }
 

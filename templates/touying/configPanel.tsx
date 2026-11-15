@@ -1,6 +1,5 @@
 import { Input, Select } from "antd";
 
-import LocalImageManager from "@/components/LocalImageManager";
 import type { ConfigPanelFC } from "@/types/templates";
 
 import type { Content } from "./contentZod";
@@ -81,7 +80,6 @@ const ConfigPanel: ConfigPanelFC<Content> = ({ content, updateContent }) => {
           }
         />
       </label>
-      <LocalImageManager {...{ content, updateContent }} />
     </form>
   );
 };

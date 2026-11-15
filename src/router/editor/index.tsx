@@ -43,6 +43,7 @@ import TemplateManager from "@/utils/templateManager";
 import ErrorPage from "../errorPage";
 import type { Route } from "./+types";
 import Body from "./body";
+import DesktopCloseGuard from "./closeGuard";
 import {
   EditorContentContext,
   EditorDocContext,
@@ -53,7 +54,6 @@ import {
 } from "./editorContext";
 import ContestEditorHeader from "./header";
 import navigationState from "./navigationState";
-
 import "./index.css";
 
 const ContestEditorLoader: FC<Route.ComponentProps> = () => {
@@ -283,6 +283,9 @@ const ContestEditor: FC<{ doc: DocumentBase; path: string[] | undefined }> = ({
   );
 
   useBeforeUnload((event: BeforeUnloadEvent) => {
+    // 桌面端由主进程拦 close 并弹「保存 / 放弃」对话框，
+    // 浏览器那套 beforeunload 在 Electron 里只会静默挡住关闭，不提示。
+    if (window.electronAPI) return;
     if (!modified) return;
     event.preventDefault();
     event.returnValue = "你确定要离开吗？未保存的更改将会丢失。";
@@ -331,6 +334,7 @@ const ContestEditor: FC<{ doc: DocumentBase; path: string[] | undefined }> = ({
           <TemplateManagerContext.Provider value={templateManager}>
             <TypstInitStatusProvider>
               <ContestEditorHeader />
+              <DesktopCloseGuard />
               <Suspense>
                 <ContestEditorMain />
               </Suspense>

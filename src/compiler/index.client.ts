@@ -1,7 +1,6 @@
 import { listenMain, send } from "@mr.python/promise-worker-ts";
 import TypstRendererWasmUrl from "@myriaddreamin/typst-ts-renderer/pkg/typst_ts_renderer_bg.wasm?url";
 import TypstCompilerWasmUrls from "@myriaddreamin/typst-ts-web-compiler/pkg/typst_ts_web_compiler_bg.wasm?split";
-import { isAxiosError } from "axios";
 
 import type { ContentBase, PrecompileContent } from "@/types/document";
 import axiosInstance from "@/utils/axiosInstance";
@@ -15,6 +14,7 @@ import {
   type ExportTypstSourceZipMessage,
 } from "./compiler.worker";
 import TypstWorker from "./compiler.worker?worker";
+import { readImageBytes } from "./imageAssets";
 import { loadLocalTypstPackages } from "./typstPackages";
 
 // 缓存只是加速手段：在 Electron 的 app:// 协议下 Cache Storage 会拒绝写入
@@ -311,21 +311,10 @@ export default class CompilerInstance {
         throw new Error(`Asset not found: ${uuid}`);
       }
 
-      url = blobUrl;
+      return await readImageBytes(blobUrl);
     }
 
-    try {
-      const response = await axiosInstance.get<ArrayBuffer>(url);
-      return response.data;
-    } catch (e) {
-      if (isAxiosError(e)) {
-        console.error("Failed to download assets.", e);
-        throw new Error(
-          "下载资源失败。这或许是因为浏览器的跨域限制。你可以尝试手动上传图片。",
-        );
-      }
-      throw e;
-    }
+    return await readImageBytes(url);
   }
 
   public dispose() {

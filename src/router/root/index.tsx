@@ -1,12 +1,18 @@
 import favicon from "/favicon.png";
-import { faInfo, faPlus, faUpload } from "@fortawesome/free-solid-svg-icons";
+import {
+  faBookOpen,
+  faFolderOpen,
+  faInfo,
+  faPlus,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { App, Button } from "antd";
-import { useCallback, type FC } from "react";
-import { useNavigate } from "react-router";
+import { useCallback, useState, type FC } from "react";
+import { useNavigate, useSearchParams } from "react-router";
 import { clientOnly$ } from "vite-env-only/macros";
 
 import { useModal } from "@/components/modalWrapper";
+import SyntaxGuide from "@/components/SyntaxGuide";
 import { VersionInfoModal } from "@/components/VersionInfoModal";
 import { createDefaultDocument } from "@/utils/newDocument";
 import { uploadDocumentFromFile } from "@/utils/uploadDocument";
@@ -18,6 +24,8 @@ import "./index.css";
 const Root: FC = () => {
   const navigate = useNavigate();
   const { message } = App.useApp();
+  const [searchParams] = useSearchParams();
+  const [guideOpen, setGuideOpen] = useState(() => searchParams.has("guide"));
 
   const [versionInfo, versionInfoContextHolder] = useModal(VersionInfoModal);
 
@@ -53,7 +61,7 @@ const Root: FC = () => {
             </Button>
             <Button
               block
-              icon={<FontAwesomeIcon icon={faUpload} />}
+              icon={<FontAwesomeIcon icon={faFolderOpen} />}
               onClick={() =>
                 uploadDocumentFromFile({
                   navigate,
@@ -62,16 +70,24 @@ const Root: FC = () => {
                       "Error when loading document from uploaded file.",
                       e,
                     );
-                    message.error("文件加载失败");
+                    message.error("文件打开失败");
                   },
                 })
               }
             >
-              上传文档
+              打开文档
             </Button>
           </div>
 
           <div className="root-sidebar-footer">
+            <Button
+              block
+              type="text"
+              icon={<FontAwesomeIcon icon={faBookOpen} />}
+              onClick={() => setGuideOpen(true)}
+            >
+              语法说明
+            </Button>
             <Button
               block
               type="text"
@@ -89,6 +105,7 @@ const Root: FC = () => {
         </div>
       </div>
       {versionInfoContextHolder}
+      <SyntaxGuide open={guideOpen} onClose={() => setGuideOpen(false)} />
     </>
   );
 };

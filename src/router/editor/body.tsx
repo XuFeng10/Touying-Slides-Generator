@@ -1,7 +1,8 @@
 import { Splitter } from "antd";
-import { useEffect, useRef, useState, type FC, use } from "react";
+import { useCallback, useEffect, useRef, useState, type FC, use } from "react";
 
 import useTemplateManager from "@/components/templateManagerContext";
+import { pushBackImage } from "@/utils/imageUpdater";
 
 import { useEditorContent, useEditorPanel } from "./editorContext";
 import MarkdownPanel from "./markdownPanel";
@@ -16,6 +17,23 @@ const Body: FC = () => {
   const divRef = useRef<HTMLDivElement>(null);
   const [sizes, setSizes] = useState<number[] | undefined>(undefined);
   const { ConfigPanelFC } = use(useTemplateManager().uiMetadataPromise);
+
+  /** 把拖入 / 粘贴 / 选择的图片加入图片库，并返回插入 Markdown 所需的信息。 */
+  const onAddImages = useCallback(
+    (files: File[]) => {
+      const images = files.map((file) => ({
+        uuid: crypto.randomUUID(),
+        name: file.name,
+        blob: file,
+      }));
+      for (const image of images) pushBackImage(image, updateContent);
+      return images.map(({ uuid, name }) => ({
+        uuid,
+        name: name.replace(/\.[^./\\]+$/, "") || "图片",
+      }));
+    },
+    [updateContent],
+  );
 
   useEffect(() => {
     if (!divRef.current) return;
@@ -85,6 +103,7 @@ const Body: FC = () => {
                           typeof v === "function" ? v(p.markdown) : v;
                       }),
                   })}
+              onAddImages={onAddImages}
             />
           )}
         </Splitter.Panel>

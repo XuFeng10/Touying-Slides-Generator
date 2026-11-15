@@ -4,6 +4,7 @@ import { Suspense, use, type FC } from "react";
 import { Link } from "react-router";
 
 import BlobImage from "@/components/BlobImage";
+import { storageMethods } from "@/storage/index.client";
 
 import "./documentGrid.css";
 import {
@@ -14,14 +15,17 @@ import {
 const DocumentGridImpl: FC<{
   recentlyOpenedPromise: Promise<RecentlyOpenedEntry[]>;
 }> = ({ recentlyOpenedPromise }) => {
-  const recentlyOpened = use(recentlyOpenedPromise);
+  const recentlyOpened = use(recentlyOpenedPromise).filter(
+    // 桌面端关闭了「浏览器存储」，历史记录里对应的条目打开必然失败，直接隐藏
+    (meta) => meta.path[0] in storageMethods,
+  );
 
   if (recentlyOpened.length === 0)
     return (
       <div className="root-document-grid-empty">
         <FontAwesomeIcon icon={faFolderOpen} />
         <strong>还没有打开过文档</strong>
-        <span>从左侧「新建文档」开始，或上传一个已有文件</span>
+        <span>从左侧「新建文档」开始，或打开一个已有文件</span>
       </div>
     );
 

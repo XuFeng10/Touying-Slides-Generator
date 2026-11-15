@@ -6,6 +6,7 @@ import { unified, type PluggableList } from "unified";
 
 import remarkExtendedTable from "./remarkExtendedTable";
 import remarkImageAttr from "./remarkImageAttr";
+import remarkLenientImage from "./remarkLenientImage";
 import remarkTypst from "./remarkTypst";
 
 export default function getProcessor(extraPlugins: PluggableList) {
@@ -13,6 +14,7 @@ export default function getProcessor(extraPlugins: PluggableList) {
     .use(remarkParse)
     .use(remarkMath)
     .use(remarkGfm)
+    .use(remarkLenientImage)
     .use(remarkImageAttr)
     .use(remarkDirective)
     .use(remarkExtendedTable)
